@@ -368,19 +368,20 @@
         });
 
         function handleFile(file) {
-            if (!file || file.type !== 'application/pdf') {
-                alert('Please select a valid PDF file.');
-                return;
-            }
+    if (!file || file.type !== 'application/pdf') {
+        alert('Please select a valid PDF file.');
+        return;
+    }
 
-            if (file.size > 50 * 1024 * 1024) { // 50MB limit
-                alert('File size must be less than 50MB.');
-                return;
-            }
+    if (file.size > 50 * 1024 * 1024) { // 50MB limit
+        alert('File size must be less than 50MB.');
+        return;
+    }
 
-            currentFileName = file.name.replace('.pdf', '');
-            convertPdfToPng(file);
-        }
+    currentFileName = file.name.replace('.pdf', '');
+    convertPdf(file); // ✅ Fixed function call
+}
+
 
         async function convertPdf(file) {
             const outputFormat = document.getElementById('outputFormat').value;
