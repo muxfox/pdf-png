@@ -97,8 +97,6 @@
                             <select id="outputFormat" class="border rounded-lg px-4 py-3 bg-white text-gray-700">
                                 <option value="png">PNG</option>
                                 <option value="jpg">JPG</option>
-                                <option value="tiff">TIFF</option>
-                                <option value="doc">DOC</option>
                             </select>
                             <button onclick="document.getElementById('fileInput').click()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-medium">
                                 Choose PDF File
@@ -410,24 +408,26 @@
                     }).promise;
 
                     let mimeType, fileExtension;
-                    if (outputFormat === 'jpg') {
-                        mimeType = 'image/jpeg';
-                        fileExtension = 'jpg';
-                    } else if (outputFormat === 'tiff') {
-                        mimeType = 'image/tiff';
-                        fileExtension = 'tiff';
-                    } else { // default to png
-                        mimeType = 'image/png';
-                        fileExtension = 'png';
-                    }
+if (outputFormat === 'jpg') {
+    mimeType = 'image/jpeg';
+    fileExtension = 'jpg';
+} else if (outputFormat === 'tiff') {
+    alert("TIFF export is not supported by browsers directly. Please use PNG or JPG.");
+    mimeType = 'image/png'; // fallback
+    fileExtension = 'png';
+} else {
+    mimeType = 'image/png';
+    fileExtension = 'png';
+}
 
-                    const imageDataUrl = canvas.toDataURL(mimeType);
-                    convertedImages.push({
-                        pageNum: pageNum,
-                        dataUrl: imageDataUrl,
-                        blob: await fetch(imageDataUrl).then(r => r.blob()),
-                        extension: fileExtension
-                    });
+const imageDataUrl = canvas.toDataURL(mimeType);
+convertedImages.push({
+    pageNum: pageNum,
+    dataUrl: imageDataUrl,
+    blob: await fetch(imageDataUrl).then(r => r.blob()),
+    extension: fileExtension
+});
+
                 }
 
                 updateProgress(100);
