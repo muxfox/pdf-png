@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF to PNG Converter - Free Online Tool</title>
+    <title>PDF Converter - PNG, JPG, TIFF, DOC - Free Online Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -77,8 +77,8 @@
         <div id="homePage" class="page">
             <!-- Hero Section -->
             <div class="text-center mb-12">
-                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-4">Convert PDF to PNG</h1>
-                <p class="text-xl text-gray-600 mb-8">Transform your PDF documents into high-quality PNG images instantly</p>
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-4">PDF Converter Tool</h1>
+                <p class="text-xl text-gray-600 mb-8">Convert PDF to PNG, JPG, TIFF, or DOC formats instantly</p>
                 <div class="flex justify-center mb-8">
                     <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/1a7a007c-f410-4057-bf78-63062a97f841.png" alt="Professional workspace showing PDF documents being converted to PNG images on a modern computer screen with clean interface design" class="rounded-lg shadow-xl" />
                 </div>
@@ -93,9 +93,17 @@
                         </svg>
                         <h3 class="text-lg font-medium text-gray-900 mb-2">Drop your PDF file here</h3>
                         <p class="text-gray-500 mb-4">or click to browse your files</p>
-                        <button onclick="document.getElementById('fileInput').click()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-medium">
-                            Choose PDF File
-                        </button>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <select id="outputFormat" class="border rounded-lg px-4 py-3 bg-white text-gray-700">
+                                <option value="png">PNG</option>
+                                <option value="jpg">JPG</option>
+                                <option value="tiff">TIFF</option>
+                                <option value="doc">DOC</option>
+                            </select>
+                            <button onclick="document.getElementById('fileInput').click()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-medium">
+                                Choose PDF File
+                            </button>
+                        </div>
                         <input type="file" id="fileInput" accept=".pdf" class="hidden" onchange="handleFile(this.files[0])">
                         <p class="text-sm text-gray-400 mt-4">Supported format: PDF (Max 50MB)</p>
                     </div>
@@ -136,7 +144,7 @@
 
             <!-- Features Section -->
             <div class="mt-20 max-w-6xl mx-auto">
-                <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Why Choose Our PDF to PNG Converter?</h2>
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Multiple Conversion Options</h2>
                 <div class="grid md:grid-cols-3 gap-8">
                     <div class="text-center p-6 bg-white rounded-lg shadow-lg">
                         <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -144,8 +152,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-semibold mb-2">Lightning Fast</h3>
-                        <p class="text-gray-600">Convert your PDF files to PNG images in seconds with our optimized processing engine.</p>
+                        <h3 class="text-xl font-semibold mb-2">Multiple Formats</h3>
+                        <p class="text-gray-600">Convert PDF to PNG, JPG, TIFF, or DOC formats - all in one convenient tool.</p>
                     </div>
                     <div class="text-center p-6 bg-white rounded-lg shadow-lg">
                         <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -374,7 +382,8 @@
             convertPdfToPng(file);
         }
 
-        async function convertPdfToPng(file) {
+        async function convertPdf(file) {
+            const outputFormat = document.getElementById('outputFormat').value;
             try {
                 showLoading();
                 convertedImages = [];
@@ -399,11 +408,24 @@
                         viewport: viewport
                     }).promise;
 
-                    const imageDataUrl = canvas.toDataURL('image/png');
+                    let mimeType, fileExtension;
+                    if (outputFormat === 'jpg') {
+                        mimeType = 'image/jpeg';
+                        fileExtension = 'jpg';
+                    } else if (outputFormat === 'tiff') {
+                        mimeType = 'image/tiff';
+                        fileExtension = 'tiff';
+                    } else { // default to png
+                        mimeType = 'image/png';
+                        fileExtension = 'png';
+                    }
+
+                    const imageDataUrl = canvas.toDataURL(mimeType);
                     convertedImages.push({
                         pageNum: pageNum,
                         dataUrl: imageDataUrl,
-                        blob: await fetch(imageDataUrl).then(r => r.blob())
+                        blob: await fetch(imageDataUrl).then(r => r.blob()),
+                        extension: fileExtension
                     });
                 }
 
@@ -455,7 +477,7 @@
             const image = convertedImages[index];
             const link = document.createElement('a');
             link.href = image.dataUrl;
-            link.download = `${currentFileName}_page_${image.pageNum}.png`;
+            link.download = `${currentFileName}_page_${image.pageNum}.${image.extension}`;
             link.click();
         }
 
@@ -465,7 +487,7 @@
                 
                 convertedImages.forEach((image) => {
                     const base64Data = image.dataUrl.split(',')[1];
-                    zip.file(`${currentFileName}_page_${image.pageNum}.png`, base64Data, {base64: true});
+                    zip.file(`${currentFileName}_page_${image.pageNum}.${image.extension}`, base64Data, {base64: true});
                 });
 
                 const blob = await zip.generateAsync({type: 'blob'});
